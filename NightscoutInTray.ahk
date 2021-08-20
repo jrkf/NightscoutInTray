@@ -20,32 +20,37 @@ SetTimer, Pau, Off
 Return
 
 Pau:
-FileRead, OutputVar, hostname.txt
-WinHTTP := ComObjCreate("WinHTTP.WinHttpRequest.5.1")
-;~ WinHTTP.SetProxy(0)
-WinHTTP.Open("GET", OutputVar "/api/v1/entries.json?count=1", 0)
-WinHTTP.SetRequestHeader("Content-Type", "application/json")
-Body := "{}"
-WinHTTP.Send(Body)
-Result := WinHTTP.ResponseText
-Status := WinHTTP.Status
-if (status != 200) {
-msgbox % "status: " status "`n`nresult: " result
-SetTimer, Pau, Off 
-}
-Else {
-Cgm :=  RegExMatch(Result, "sgv..(\d*),", SubPat)
-;msgbox % "status: " status "`n`nresult: " SubPat.Value(1)
-Menu, Tray, Tip , %Result%
-hIcon :=  "numbers/" SubPat.Value(1)
-Menu, Tray, Icon , %hIcon%.ico
-}
+try {
+		FileRead, OutputVar, hostname.txt
+		WinHTTP := ComObjCreate("WinHTTP.WinHttpRequest.5.1")
+		;~ WinHTTP.SetProxy(0)
+		WinHTTP.Open("GET", OutputVar "/api/v1/entries.json?count=1", 0)
+		WinHTTP.SetRequestHeader("Content-Type", "application/json")
+		Body := ""
+		WinHTTP.Send(Body)
+		Result := WinHTTP.ResponseText
+		Status := WinHTTP.Status
+		if (status != 200) {
+			;msgbox % "status: " status "`n`nresult: " result
+			;SetTimer, Pau, Off 
+			Menu, Tray, Icon , %hIcon%.ico
+		}
+		Else {
+			Cgm :=  RegExMatch(Result, "sgv..(\d*),", SubPat)
+			;msgbox % "status: " status "`n`nresult: " SubPat.Value(1)
+			Menu, Tray, Tip , %Result%
+			hIcon :=  "numbers/" SubPat.Value(1)
+			Menu, Tray, Icon , %hIcon%.ico
+		}
+	} 
+catch e
+    ;MsgBox % "Error in " e.What ", which was called at line " e.Line  
 
 
 f11::
          
 Start:
-SetTimer, Pau, 6000
+SetTimer, Pau, 150000
 GOTO Pau
 
 Exi:
@@ -53,4 +58,4 @@ ExitApp
 Return
 Rel:
 Reload
-Return          
+Return                
